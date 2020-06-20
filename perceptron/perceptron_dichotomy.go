@@ -6,7 +6,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -53,35 +55,31 @@ func perceptron(dataArr [][]float64, labelArr []float64, iter_optional ...int) (
 	labelMat := mat.NewVecDense(len(labelArr), labelArr).T()
 	var m, n int = dataMat.Dims()
 
-	w := mat.NewVecDense(n, nil)
+	w := make([]float64, n)
 
-	//b := mat.NewVecDense(1, nil)
 	var b float64 = 0
 	var h float64 = 0.0001
-
-	//var h_val = []float64{0.0001}
-	//h := mat.NewDense(1, 1, h_val)
 
 	for k := 0; k < iter; k++ {
 
 		for i := 0; i < m; i++ {
-			xi := mat.NewVecDense(n, mat.Row(nil, i, dataMat))
+			xi := mat.Row(nil, i, dataMat)
 
-			yi := mat.NewVecDense(n, mat.Row(nil, i, labelMat))
+			yi := mat.Row(nil, i, labelMat)[0]
 
-			var tem mat.Dense
+			if -1*(floats.Dot(w, xi)+b)*yi >= 0 {
 
-			/*if -1*ScaleVec((Dot(w, xi)+b), yi) >= 0 {
-				w = AddVec(w, Dot(h, yi))
-				b = b.Add(b, tem.Mul(h, yi))
-			}*/
+				floats.Scale(h*yi, xi)
+				floats.Add(w, xi)
+				b = b + h*yi
+			}
 		}
 		fmt.Printf("Round %d:%d training", k, iter)
 	}
-	return w.RawVector().Data, b
+	return w, b
 }
 
-func model_test(dataArr [][]float64, labelArr []float64, w float64, b float64) float64 {
+func model_test(dataArr [][]float64, labelArr []float64, w []float64, b float64) float64 {
 
 	println("start to test")
 	var data []float64
@@ -94,17 +92,36 @@ func model_test(dataArr [][]float64, labelArr []float64, w float64, b float64) f
 	var errorCnt float64 = 0
 
 	//w_vec := mat.NewDense(1, n, w)
-	/*for i := 0; i < m; i++ {
-		xi := mat.NewVecDense(len(dataMat[i]), dataMat[i])
-		yi := mat.NewVecDense(len(labelMat[i]), labelMat[i])
-		var result mat.Dense
-		result := result.Scale(-1, result.Mul(yi, result.Add(result.Mul(w, xi.T()+b))))
-		if result >= 0 {
+	for i := 0; i < m; i++ {
+		xi := mat.Row(nil, i, dataMat)
+
+		yi := mat.Row(nil, i, labelMat)[0]
+
+		if -1*(floats.Dot(w, xi)+b)*yi >= 0 {
 			errorCnt += 1
 		}
-	}*/
+	}
 	var accruRate float64 = 1 - (errorCnt / float64(m))
 
 	return accruRate
 
+}
+
+func main() {
+
+	start := time.Now()
+
+	var trainData, trainLabel = loadData("Mnist/mnist_train.csv")
+
+	testData, testLabel := loadData("../Mnist/mnist_test.csv")
+
+	w, b := perceptron(trainData, trainLabel, 30)
+
+	accruRate := model_test(testData, testLabel, w, b)
+
+	end := time.Now()
+
+	println("accuracy rate is: %v", accruRate)
+
+	println("time span: %v", end.Sub(start))
 }
