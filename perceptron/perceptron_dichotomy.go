@@ -17,6 +17,7 @@ func loadData(fileName string) ([][]float64, []float64) {
 	var dataArr [][]float64
 	var labelArr []float64
 	fp, err := os.Open(fileName)
+	_ = err
 	defer fp.Close()
 	scanner := bufio.NewScanner(fp)
 	var count int = 0
@@ -24,6 +25,7 @@ func loadData(fileName string) ([][]float64, []float64) {
 		fmt.Println(scanner.Text())
 		curLine := strings.Split(scanner.Text(), ",")
 		i, err := strconv.Atoi(curLine[0])
+		_ = err
 		if i >= 5 {
 			labelArr = append(labelArr, 1)
 		} else {
@@ -31,7 +33,9 @@ func loadData(fileName string) ([][]float64, []float64) {
 		}
 		var ele []float64
 		for i, num := range curLine[1:] {
+			_ = i
 			num, err := strconv.ParseFloat(num, 64)
+			_ = err
 			ele = append(ele, num/255)
 		}
 		dataArr[count] = ele
@@ -49,6 +53,7 @@ func perceptron(dataArr [][]float64, labelArr []float64, iter_optional ...int) (
 	println("start to trans")
 	var data []float64
 	for i, d := range dataArr {
+		_ = i
 		data = append(data, d...)
 	}
 	dataMat := mat.NewDense(len(dataArr), len(dataArr[0]), data)
@@ -84,11 +89,13 @@ func model_test(dataArr [][]float64, labelArr []float64, w []float64, b float64)
 	println("start to test")
 	var data []float64
 	for i, d := range dataArr {
+		_ = i
 		data = append(data, d...)
 	}
 	dataMat := mat.NewDense(len(dataArr), len(dataArr[0]), data)
 	labelMat := mat.NewVecDense(len(labelArr), labelArr).T()
 	var m, n int = dataMat.Dims()
+	_ = n
 	var errorCnt float64 = 0
 
 	//w_vec := mat.NewDense(1, n, w)
@@ -111,7 +118,7 @@ func main() {
 
 	start := time.Now()
 
-	var trainData, trainLabel = loadData("Mnist/mnist_train.csv")
+	trainData, trainLabel := loadData("Mnist/mnist_train.csv")
 
 	testData, testLabel := loadData("../Mnist/mnist_test.csv")
 

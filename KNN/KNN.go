@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"gonum.org/v1/gonum/floats"
 )
@@ -94,4 +95,44 @@ func index(list []float64, data float64) int {
 	}
 	println("Finding fails")
 	return -1
+}
+
+func model_test(trainDataArr [][]float64, trainLabelArr []float64,
+	testDataArr [][]float64, testLabelArr []float64, topK int) float64 {
+
+	var errorCnt float64 = 0
+	trainDataMat := trainDataArr
+	trainLabelMat := trainLabelArr
+	testDataMat := testDataArr
+	testLabelMat := testLabelArr
+	for i := 0; i < 200; i++ {
+
+		println("test %d:%d", i, 200)
+
+		x := testDataMat[i]
+
+		y := getClosest(trainDataMat, trainLabelMat, x, topK)
+
+		if y != int(testLabelMat[i]) {
+			errorCnt += 1
+		}
+	}
+	return 1 - (errorCnt / float64(200))
+}
+
+func main() {
+
+	start := time.Now()
+
+	trainDataArr, trainLabelArr := loadData("Mnist/mnist_train.csv")
+
+	testDataArr, testLabelArr := loadData("../Mnist/mnist_test.csv")
+
+	accur := model_test(trainDataArr, trainLabelArr, testDataArr, testLabelArr, 25)
+
+	println("accur is:%d %", accur*100)
+
+	end := time.Now()
+
+	println("time span: %v", end.Sub(start))
 }
