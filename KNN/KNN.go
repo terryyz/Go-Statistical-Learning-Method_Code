@@ -132,7 +132,5 @@ func main() {
 
 	println("accur is:%d %", accur*100)
 
-	end := time.Now()
-
-	println("time span: %v", end.Sub(start))
+	println("time span: %v", time.Now().Sub(start))
 }
