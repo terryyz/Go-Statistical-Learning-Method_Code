@@ -126,7 +126,9 @@ func main() {
 
 	accruRate := model_test(testData, testLabel, w, b)
 
+	end := time.Now()
+
 	println("accuracy rate is: %v", accruRate)
 
-	println("time span: %v", time.Now().Sub(start))
+	println("time span: %v", end.Sub(start))
 }
